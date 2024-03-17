@@ -29,7 +29,7 @@ pip install -r requirements.txt
 
 ## Auto Instrument
 OTEL provides several packages that will auto instrument our code. In this example it will generate events/spans with 
-trace ids for the inbound and outbound requests to our app. This is a good starting point so we need to pull in these 
+trace ids for the inbound and outbound requests to our app. This is a good starting point, so we need to pull in these 
 instrumentation packages. the below command will pull in all auto-instrumentation packages. For the purpose of this demo
 this is fine.
 
@@ -111,10 +111,10 @@ should be added to the span.
 For example, we can instrument the sleep function to add the sleep time into the span.
 
 ```python
-    sleep_time = randint(1, 5)
+sleep_time = randint(1, 5)
 
-    span = trace.get_current_span()
-    span.set_attribute("sleep_time", sleep_time)
+span = trace.get_current_span()
+span.set_attribute("sleep_time", sleep_time)
 ```
 
 ![sleep-time-attribute](./images/sleep-time-attribute.png)
@@ -147,18 +147,18 @@ One point to note is that this doesn't mark the span as an error. It simply adds
 request still returns to the user. If we want to mark the span as error then we need to set the status to error
 
 ```python
-        span.record_exception(ve)
-        span.set_status(trace.StatusCode(2))
+span.record_exception(ve)
+span.set_status(trace.StatusCode(2))
 ```
 
 ![span-exception-error](./images/span-exception-error.png)
 
 ## Adding events to a span (Logging)
 A trace is a collection of spans. A span carries with it context in the form of attributes. While the current direction 
-of observability is to have a span per unit of work, like a http request etc, and enrich that event with wide set of attributes.
+of observability is to have a span per unit of work, like a http request etc., and enrich that event with wide set of attributes.
 However, the community understands putting all attributes in a single event is not the best case. So spans can also 
-contain span events. A span event is just an event but it's linked to a span. This is a way to log events that can still
-be searched like logs, but can also be viewed in context to a trace. span events should only be used where you dont care
+contain span events. A span event is just an event, but it's linked to a span. This is a way to log events that can still
+be searched like logs, but can also be viewed in context to a trace. span events should only be used where you don't care
 about the duration of the event. I.E you just want to record information at a point in time. If you care about the duration
 you should create a new span instead.
 
