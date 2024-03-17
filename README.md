@@ -60,7 +60,7 @@ INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 ```
 
-# Traces
+# Traces, Spans and events
 
 ## Auto instrumented trace
 We can look at a single trace for a request to the `/hello/{name}` route. This trace was in the early stages of this repo
@@ -125,3 +125,67 @@ example
 ![sleep-time-less-than-3](./images/sleep-time-attribute-less-than-3.png)
 
 This then becomes very powerful to allow us to ask questions about our data.
+
+## Adding exceptions to spans
+The OTEL library provides a method to add exceptions to spans. This can be useful where you want to record an exception 
+caught in a try/except block for example.
+
+```python
+async def exception():
+    span = trace.get_current_span()
+    try:
+        raise ValueError("Something went wrong")
+    except ValueError as ve:
+        span.record_exception(ve)
+        return {"error": str(ve)}
+```
+
+![span-exception](./images/span-exception.png)
+
+One point to note is that this doesn't mark the span as an error. It simply adds the exception context to the span and the
+request still returns to the user. If we want to mark the span as error then we need to set the status to error
+
+```python
+        span.record_exception(ve)
+        span.set_status(trace.StatusCode(2))
+```
+
+![span-exception-error](./images/span-exception-error.png)
+
+## Adding events to a span (Logging)
+A trace is a collection of spans. A span carries with it context in the form of attributes. While the current direction 
+of observability is to have a span per unit of work, like a http request etc, and enrich that event with wide set of attributes.
+However, the community understands putting all attributes in a single event is not the best case. So spans can also 
+contain span events. A span event is just an event but it's linked to a span. This is a way to log events that can still
+be searched like logs, but can also be viewed in context to a trace. span events should only be used where you dont care
+about the duration of the event. I.E you just want to record information at a point in time. If you care about the duration
+you should create a new span instead.
+
+In the following code block we are creating new events related to the span. These could contain contextual information
+from a point in time. 
+
+```python
+@app.get("/exception")
+async def exception():
+    span = trace.get_current_span()
+    span.add_event("pre_exception_event", attributes={"stage": "pre_exception"})
+    sleep(0.1)
+    try:
+        span.add_event("try_exception_event", attributes={"stage": "during_exception", "foo": ["bar", "baz"]})
+        sleep(0.1)
+        raise ValueError("Something went wrong")
+    except ValueError as ve:
+        span.add_event("catch_exception_event", attributes={"stage": "caught_exception"})
+        sleep(0.1)
+        span.record_exception(ve)
+        span.set_status(trace.StatusCode(2))
+        return {"error": str(ve)}
+```
+
+Viewing this in honeycomb we can see span events as circles on the span duration in the waterfall. We can click on any 
+of these to view the span event. We can slo see on the right that there are 4 span events linked to this span.
+
+![span-event](./images/span-events.png)
+
+So we can now view structured log info in the form of a span event, in relation to the span, but since these are just events
+like spans are they can also be searched the same way as you search a span.

@@ -29,6 +29,23 @@ async def slow_hello(name: str):
     return {"message": f"Hello {formatted_name}"}
 
 
+@app.get("/exception")
+async def exception():
+    span = trace.get_current_span()
+    span.add_event("pre_exception_event", attributes={"stage": "pre_exception"})
+    sleep(0.1)
+    try:
+        span.add_event("try_exception_event", attributes={"stage": "during_exception", "foo": ["bar", "baz"]})
+        sleep(0.1)
+        raise ValueError("Something went wrong")
+    except ValueError as ve:
+        span.add_event("catch_exception_event", attributes={"stage": "caught_exception"})
+        sleep(0.1)
+        span.record_exception(ve)
+        span.set_status(trace.StatusCode(2))
+        return {"error": str(ve)}
+
+
 @tracer.start_as_current_span("random_sleep")
 def random_sleep() -> int:
     sleep_time = randint(1, 5)
@@ -53,4 +70,4 @@ def format_name(name: str, slow: bool = False) -> str:
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000)
