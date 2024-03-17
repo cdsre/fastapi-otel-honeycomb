@@ -1,8 +1,6 @@
 # OTEl Example with FastAPI
 
-This repo is an annotated fastapi example that uses honeycomb as the destination for OTEL traffic. It is using honeycombs
-own [distro](https://pypi.org/project/honeycomb-opentelemetry/) for easy integration of OTEL. However also uses OTEL
-package to add attributes to spans or start new spans.
+This repo is an annotated fastapi example that uses honeycomb as the destination for OTEL traffic.
 
 In this example we are using [honeycomb](https://www.honeycomb.io/) as the backend for the telemetry data. Honeycomb 
 provides a free tier allowing you to ingest 20million events per month.
