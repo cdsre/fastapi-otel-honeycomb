@@ -17,10 +17,10 @@ Install the honeycomb-opentelemetry distro in a virtual env with the below comma
 important because the package is still in `beta`.
 
 ```shell
-python -m pip install honeycomb-opentelemetry fastapi uvicorn --pre
+python -m pip install opentelemetry-distro[otlp] fastapi uvicorn --pre
 ```
 
-Alternativly you can set up the environment from the requirements file. If you do this you can skip the auto instrument
+Alternatively you can set up the environment from the requirements file. If you do this you can skip the auto instrument
 section below.
 
 ```shell
@@ -40,10 +40,11 @@ opentelemetry-bootstrap --action=install
 ## Environment
 In order to be able to ship our data to the honeycomb backend we need to set the following environment variables. You 
 can create an API key from your honeycomb account, and the service name is what ever you want this to show under in the
-backend.
+backend. Here we are just directly exporting to the backend rather than using OTEL collector.
 
 ```shell
-export HONEYCOMB_API_KEY=neqfoeXXXXXXXOac0mwYf
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://api.honeycomb.io
+export OTEL_EXPORTER_OTLP_HEADERS=x-honeycomb-team\=hcaik_01hs5pepeqbjkXXXXXXXXXXXXXXXXXXXXXXX5wz16aka11crdd152p
 export OTEL_SERVICE_NAME=my-service-name
 ```
 
