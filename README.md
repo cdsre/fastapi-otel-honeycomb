@@ -188,3 +188,28 @@ of these to view the span event. We can slo see on the right that there are 4 sp
 
 So we can now view structured log info in the form of a span event, in relation to the span, but since these are just events
 like spans are they can also be searched the same way as you search a span.
+
+## OTEL Collector
+In the above example we were directly exporting to the honeycomb backend using the OTEL SDK. This is fine for development
+and testing. However, for real environments we should use the OTEL collector. The collector is not just a proxy for the 
+traffic, but can be used to distribute, sample and transform the data.
+
+it can be used to send traces to multiple backends, it can do pre-processing of events received to the collector before 
+routing them to backends. This could be transforming the data, further enriching it or even using sampling rates to send
+only some of the traces to the backend.
+
+To run the collector we will use the docker image of it and pass it our config and our API key from our env vars.
+
+```shell
+ docker run -p 4317:4317 -v $(pwd)/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml -e OTEL_HONEYCOMB_APIKEY otel/opentelemetry-collector-contrib:latest
+```
+
+Before running our fastapi app we need to update the OTEL exporter to send the traffic to the collector instead of the 
+honeycomb backend
+
+```shell
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+```
+
+In this example we are just setting up a simple data pipeline here where we just pass what ever we got on the receiver on 
+to the exporter via the batch processor. We might look to add more features like transformation and sampling in the future.

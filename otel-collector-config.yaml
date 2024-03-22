@@ -1,0 +1,29 @@
+# otel-collector-otel-collector-config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: "api.honeycomb.io:443" # US instance
+    headers:
+      "x-honeycomb-team": "${env:OTEL_HONEYCOMB_APIKEY}"
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+  telemetry:
+    logs:
+      level: INFO
+    metrics:
+      level: none
