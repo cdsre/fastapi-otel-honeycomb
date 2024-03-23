@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  fastapp:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    image: python:3.12.0
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://opentelemetry-collector:4317
+      - OTEL_SERVICE_NAME=my-service-name
+    ports:
+      - "8000:8000"
+    networks:
+      - otel-example
+
+  opentelemetry-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    networks:
+      - otel-example
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+    environment:
+      - OTEL_HONEYCOMB_APIKEY
+
+networks:
+  otel-example:
+    driver: bridge

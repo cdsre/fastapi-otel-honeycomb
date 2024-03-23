@@ -9,6 +9,16 @@ The [get-started doc](https://docs.honeycomb.io/get-started/start-building/appli
 were used to build this setup.
 
 # Setup
+I have wrapped all of this in docker-compose so that it should be runable from the project. The only thing you should 
+need to set is the API key for honeycomb
+
+```shell
+export OTEL_HONEYCOMB_APIKEY=hcaik_01hs5pepeqbjkgd4exrxxxxxxxxxxxxxxxxxxxxxx6aka11crdd152p
+```
+
+You can additionally edit the docker-compose file for `service-name` or the `otel-collector-config` for apiurl
+
+Alternatively you can follow the manual steps below to build it your self locally without docker for the app.
 
 ## pip
 Install the honeycomb-opentelemetry distro in a virtual env with the below command. Note that the `--pre` flag is 
