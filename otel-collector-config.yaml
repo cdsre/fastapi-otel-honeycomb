@@ -7,24 +7,6 @@ receivers:
       http:
         endpoint: 0.0.0.0:4318
 
-  hostmetrics:
-    collection_interval: 60s
-    scrapers:
-      # CPU utilization metrics
-      cpu:
-      # Disk I/O metrics
-      disk:
-      # File System utilization metrics
-      filesystem:
-      # CPU load metrics
-      load:
-      # Memory utilization metrics
-      memory:
-      # Network interface I/O metrics & TCP connection metrics
-      network:
-      # Paging/Swap space utilization and I/O metrics
-      paging:
-
 processors:
   batch:
   probabilistic_sampler:
@@ -42,10 +24,6 @@ service:
       receivers: [otlp]
       processors: [probabilistic_sampler, batch]
       exporters: [otlp]
-    metrics:
-        receivers: [ otlp, hostmetrics ]
-        processors: [ batch ]
-        exporters: [ otlp ]
   telemetry:
     logs:
       level: INFO
