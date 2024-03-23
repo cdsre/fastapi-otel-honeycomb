@@ -7,9 +7,29 @@ receivers:
       http:
         endpoint: 0.0.0.0:4318
 
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      # CPU utilization metrics
+      cpu:
+      # Disk I/O metrics
+      disk:
+      # File System utilization metrics
+      filesystem:
+      # CPU load metrics
+      load:
+      # Memory utilization metrics
+      memory:
+      # Network interface I/O metrics & TCP connection metrics
+      network:
+      # Paging/Swap space utilization and I/O metrics
+      paging:
+
 processors:
   batch:
-
+  probabilistic_sampler:
+    hash_seed: 22
+    sampling_percentage: 20
 exporters:
   otlp:
     endpoint: "api.honeycomb.io:443" # US instance
@@ -20,10 +40,10 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch]
+      processors: [probabilistic_sampler, batch]
       exporters: [otlp]
     metrics:
-        receivers: [ otlp ]
+        receivers: [ otlp, hostmetrics ]
         processors: [ batch ]
         exporters: [ otlp ]
   telemetry:

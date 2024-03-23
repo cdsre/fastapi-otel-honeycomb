@@ -223,3 +223,20 @@ export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 
 In this example we are just setting up a simple data pipeline here where we just pass what ever we got on the receiver on 
 to the exporter via the batch processor. We might look to add more features like transformation and sampling in the future.
+
+## OTEL Collector Sampling
+In heavy workload systems while in theory it would be great to have every trace for every transaction, In reality, the 
+processing and storage costs would sky rocket. So it may be more prudent to use a sampling processor to send only a 
+certain percentage of the traces to the backend. To do this we can use prebuilt samplers. This can then be added to the 
+services pipeline to filter requests from the receiver before sending them to the exporters.
+
+```yaml
+processors:
+  batch:
+  probabilistic_sampler:
+    hash_seed: 22
+    sampling_percentage: 20
+```
+
+In this example we are sending only 20% of the traces to the backend. This allows us to still see traces for general workload flows without having every single trace.
+ 
