@@ -9,32 +9,44 @@ receivers:
 
 processors:
   batch:
-  probabilistic_sampler:
-    hash_seed: 22
-    sampling_percentage: 100
+  tail_sampling:
+    policies:
+      # Sample only 20% of the traces
+      - name: probability sampler
+        type: probabilistic
+        probabilistic: { sampling_percentage: 20 }
+      # Always sample errors
+      - name: error sampler
+        type: status_code
+        status_code: { status_codes: [ ERROR ] }
+
 exporters:
   otlp:
     endpoint: "api.honeycomb.io:443" # US instance
     headers:
       "x-honeycomb-team": "${env:OTEL_HONEYCOMB_APIKEY}"
-
   otlp/signoz:
     endpoint: http://51.195.254.28:4317
     tls:
       insecure: true
       insecure_skip_verify: true
+
 service:
   pipelines:
     traces:
-      receivers: [otlp]
-      processors: [probabilistic_sampler, batch]
-      exporters: [otlp, otlp/signoz]
+      receivers: [ otlp ]
+      processors: [ tail_sampling, batch ]
+      exporters:
+        - otlp
+    #       - otlp/signoz
     metrics:
       receivers: [ otlp ]
       processors: [ batch ]
-      exporters: [ otlp, otlp/signoz ]
+      exporters:
+        - otlp
+  #       - otlp/signoz
   telemetry:
     logs:
-      level: INFO
+      level: DEBUG
     metrics:
       level: none
